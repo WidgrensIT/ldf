@@ -1,7 +1,7 @@
 #{prefix => "",
   security => false,
   routes => [
-            {"/", { ldf_main_controller, index}, #{methods => [get]}}
+            {"/receiver", { ldf_receiver_controller, incoming_message}, #{methods => [post]}}
            ],
  statics => [
              {"/assets/[...]", "assets"}
