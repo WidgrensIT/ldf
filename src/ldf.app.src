@@ -9,7 +9,8 @@
    [
     kernel,
     stdlib,
-    nova
+    nova,
+    xmerl
    ]},
   {env,[]},
   {modules, []},

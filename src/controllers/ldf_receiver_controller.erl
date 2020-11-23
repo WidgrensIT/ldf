@@ -6,5 +6,6 @@
 incoming_message(#{req := #{method := <<"POST">>},
                    json := Json}) ->
     logger:debug("incoming message: ~p", [Json]),
-    etsi103707:json_to_xml(Json),
+    Result = etsi103707:json_to_xml(Json),
+    logger:debug(Result),
     {status, 200}.
