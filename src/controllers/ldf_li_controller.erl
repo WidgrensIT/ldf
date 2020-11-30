@@ -14,4 +14,5 @@ manage_li(#{req := #{method := <<"GET">>}}) ->
 
 delete_li(#{req := #{method := <<"DELETE">>,
                      bindings := #{liid := Liid}}}) ->
+    ldf_srv:remove_li(Liid),
     {status, 200}.
