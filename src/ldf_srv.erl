@@ -86,7 +86,10 @@ handle_call({add, Type, #{<<"id">> := Value}}, _, State) ->
     NewState = State#state{li = List},
     {reply, List, NewState};
 handle_call({remove, Id}, _, State) ->
-    List = [ Item || #{id := ItemId} = Item <- State#state.li, Id =/= ItemId],
+    #{status := {200, _}} = shttpc:delete([?CALLBACKPATH, <<"/">>, Id],
+                                            #{headers => #{'Content-Type' => <<"application/json">>},
+                                              close => true}),
+    List = [ Item || #{callback_id := CallbackId} = Item <- State#state.li, Id =/= CallbackId],
     {reply, List, State#state{li = List}};
 handle_call(get_all, _, State) ->
     {reply, State#state.li, State};
