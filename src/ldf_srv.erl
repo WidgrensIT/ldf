@@ -35,7 +35,7 @@ start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 add_li(Item) ->
-    gen_server:call(?MODULE, {add, Item}).
+    gen_server:call(?MODULE, {add, <<"email">>, Item}).
 
 remove_li(Id) ->
     gen_server:call(?MODULE, {remove, Id}).
@@ -76,12 +76,13 @@ init([]) ->
           {noreply, NewState :: term(), hibernate} |
           {stop, Reason :: term(), Reply :: term(), NewState :: term()} |
           {stop, Reason :: term(), NewState :: term()}.
-handle_call({add, Type, Value}, _, State) ->
+handle_call({add, Type, #{<<"id">> := Value}}, _, State) ->
     Object = #{<<"type">> => Type,
              <<"value">> => Value,
              <<"url">> => ?URL},
-    #{status := {200, _}, body := RespBody} = shttpc:post([?CALLBACKPATH], Object),
-    List = [#{id => Value} | State#state.li],
+    #{status := {200, _}, body := RespBody} = shttpc:post([?CALLBACKPATH], json:encode(Object, [maps,binary]), #{headers => #{'Content-Type' => <<"application/json">>}, close => true}),
+    #{<<"id">> := CallbackId} = json:decode(RespBody, [maps]),
+    List = [#{id => Value, callback_id => CallbackId} | State#state.li],
     NewState = State#state{li = List},
     {reply, List, NewState};
 handle_call({remove, Id}, _, State) ->

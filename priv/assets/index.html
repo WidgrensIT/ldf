@@ -17,6 +17,7 @@
                 <thead>
                     <tr>
                         <th>Id</th>
+                        <th>Callback Id</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -24,10 +25,11 @@
                     <template v-for="item in items">
                         <tr>
                             <td>{{ item.id  }}</td>
+                            <td>{{ item.callback_id }}</td>
                             <td><button class="btn btn-danger" @click="removeItem(item)">Remove</button></td>
                         </tr>
                     </template>
-                </tbody> 
+                </tbody>
             </table>
         </div>
         <script src="https://unpkg.com/vue"></script>
@@ -43,7 +45,7 @@
                     axios
                         .get('http://localhost:8095/li')
                         .then(response => (this.items = response.data))
-                        
+
                 },
                 methods: {
                     saveItem: function() {
