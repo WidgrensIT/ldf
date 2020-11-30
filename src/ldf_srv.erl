@@ -13,6 +13,8 @@
          terminate/2, code_change/3, format_status/2]).
 
 -define(SERVER, ?MODULE).
+-define(CALLBACKPATH, <<"http://localhost:8090/v1/callback">>).
+-define(URL, <<"http://localhost:8095/receiver">>).
 
 -record(state, {li = []}).
 
@@ -74,9 +76,12 @@ init([]) ->
           {noreply, NewState :: term(), hibernate} |
           {stop, Reason :: term(), Reply :: term(), NewState :: term()} |
           {stop, Reason :: term(), NewState :: term()}.
-handle_call({add, Item}, _, State) ->
-    List = [Item | State#state.li],
-
+handle_call({add, Type, Value}, _, State) ->
+    Object = #{<<"type">> => Type,
+             <<"value">> => Value,
+             <<"url">> => ?URL},
+    #{status := {200, _}, body := RespBody} = shttpc:post([?CALLBACKPATH], Object),
+    List = [#{id => Value} | State#state.li],
     NewState = State#state{li = List},
     {reply, List, NewState};
 handle_call({remove, Id}, _, State) ->
