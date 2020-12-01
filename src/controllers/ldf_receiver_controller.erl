@@ -1,11 +1,19 @@
 -module(ldf_receiver_controller).
 -export([
-         incoming_message/1
+         message/1
         ]).
 
-incoming_message(#{req := #{method := <<"POST">>},
+message(#{req := #{method := <<"POST">>},
                    json := Json}) ->
-    logger:debug("incoming message: ~p", [Json]),
-    Result = etsi103707:json_to_xml(Json),
-    logger:debug(Result),
-    {status, 200}.
+    ok = ldf_db:add_message(encode(Json)),
+    {status, 200};
+message(#{req := #{method := <<"GET">>}}) ->
+    {ok, List} = ldf_db:get_messages(),
+    Xml = [etsi103707:json_to_xml(decode(Json)) || #{payload := Json} <- List],
+    {json, 200, #{}, Xml}.
+
+encode(Item) ->
+    json:encode(Item, [maps, binary]).
+
+decode(Item) ->
+    json:decode(Item, [maps]).

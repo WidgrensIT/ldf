@@ -5,8 +5,9 @@
         ]).
 
 manage_li(#{req := #{method := <<"POST">>},
-            json := Json}) ->
-    Object = ldf_srv:add_li(Json),
+            json := #{<<"value">> := Value,
+                      <<"type">> := Type}}) ->
+    Object = ldf_srv:add_li(Type, Value),
     {json, 201, #{}, Object};
 manage_li(#{req := #{method := <<"GET">>}}) ->
     List = ldf_srv:get_all_li(),

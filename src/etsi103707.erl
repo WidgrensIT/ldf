@@ -28,7 +28,7 @@ json_to_xml(#{<<"chatId">> := ChatId,
                                       ]
                             }
                 ],
-    lists:flatten(xmerl:export_simple([header(Content)], xmerl_xml)).
+    list_to_binary(lists:flatten(xmerl:export_simple([header(Content)], xmerl_xml))).
 
 
 

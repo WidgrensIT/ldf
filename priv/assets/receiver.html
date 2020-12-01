@@ -10,23 +10,17 @@
     </head>
     <body>
         <div id="li-list">
-            <h1>LDF Admin</h1>
-            <input v-model="newItem" type="text" placeholder="Add email or phone number" class="form-control">
-            <button class="btn btn-primary" @click="saveItem">Add</button>
+            <h1>LDF Receiver</h1>
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Id</th>
-                        <th>Callback Id</th>
-                        <th>Action</th>
+                        <th>Message</th>
                     </tr>
                 </thead>
                 <tbody>
                     <template v-for="item in items">
                         <tr>
-                            <td>{{ item.id  }}</td>
-                            <td>{{ item.callback_id }}</td>
-                            <td><button class="btn btn-danger" @click="removeItem(item)">Remove</button></td>
+                            <td>{{ item }}</td>
                         </tr>
                     </template>
                 </tbody>
@@ -39,26 +33,14 @@
                 el: '#li-list',
                 newItem: '',
                 data: {
-                    items: []
+                    items: [],
+                    picked: null
                 },
                 mounted () {
                     axios
-                        .get('http://localhost:8095/li')
+                        .get('http://localhost:8095/receiver')
                         .then(response => (this.items = response.data))
 
-                },
-                methods: {
-                    saveItem: function() {
-                        item = {id: this.newItem};
-                        axios
-                            .post('http://localhost:8095/li', item)
-                            .then(response => (this.items.push = response.data) );
-                        this.newItem = '';
-                    },
-                    removeItem: function(item) {
-                        axios
-                            .delete('http://localhost:8095/li/' + item.callback_id)
-                    }
                 }
             });
         </script>

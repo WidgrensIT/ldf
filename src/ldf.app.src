@@ -10,7 +10,8 @@
     kernel,
     stdlib,
     nova,
-    xmerl
+    xmerl,
+    pgo
    ]},
   {env,[]},
   {modules, []},

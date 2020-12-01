@@ -4,7 +4,7 @@
 
 %% API
 -export([start_link/0,
-         add_li/1,
+         add_li/2,
          remove_li/1,
          get_all_li/0]).
 
@@ -16,7 +16,7 @@
 -define(CALLBACKPATH, <<"http://localhost:8090/v1/callback">>).
 -define(URL, <<"http://localhost:8095/receiver">>).
 
--record(state, {li = []}).
+-record(state, {}).
 
 %%%===================================================================
 %%% API
@@ -34,8 +34,8 @@
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-add_li(Item) ->
-    gen_server:call(?MODULE, {add, <<"email">>, Item}).
+add_li(Type, Value) ->
+    gen_server:call(?MODULE, {add, Type, Value}).
 
 remove_li(Id) ->
     gen_server:call(?MODULE, {remove, Id}).
@@ -76,23 +76,29 @@ init([]) ->
           {noreply, NewState :: term(), hibernate} |
           {stop, Reason :: term(), Reply :: term(), NewState :: term()} |
           {stop, Reason :: term(), NewState :: term()}.
-handle_call({add, Type, #{<<"id">> := Value}}, _, State) ->
+handle_call({add, Type, Value}, _, State) ->
     Object = #{<<"type">> => Type,
              <<"value">> => Value,
              <<"url">> => ?URL},
-    #{status := {200, _}, body := RespBody} = shttpc:post([?CALLBACKPATH], json:encode(Object, [maps,binary]), #{headers => #{'Content-Type' => <<"application/json">>}, close => true}),
-    #{<<"id">> := CallbackId} = json:decode(RespBody, [maps]),
-    List = [#{id => Value, callback_id => CallbackId} | State#state.li],
-    NewState = State#state{li = List},
-    {reply, List, NewState};
-handle_call({remove, Id}, _, State) ->
-    #{status := {200, _}} = shttpc:delete([?CALLBACKPATH, <<"/">>, Id],
+    case shttpc:post([?CALLBACKPATH],
+                      json:encode(Object, [maps,binary]),
+                      #{headers => #{'Content-Type' => <<"application/json">>}, close => true}) of
+        #{status := {404, _}} ->
+            {reply, undefined, State};
+        #{status := {200, _}, body := RespBody} ->
+            #{<<"id">> := CallbackId} = json:decode(RespBody, [maps]),
+            ok = ldf_db:add_li(Type, Value, CallbackId),
+            {reply, #{callback_id => CallbackId}, State}
+    end;
+handle_call({remove, CallbackId}, _, State) ->
+    #{status := {200, _}} = shttpc:delete([?CALLBACKPATH, <<"/">>, CallbackId],
                                             #{headers => #{'Content-Type' => <<"application/json">>},
                                               close => true}),
-    List = [ Item || #{callback_id := CallbackId} = Item <- State#state.li, Id =/= CallbackId],
-    {reply, List, State#state{li = List}};
+    ok = ldf_db:remove_li(CallbackId),
+    {reply, #{status => ok}, State};
 handle_call(get_all, _, State) ->
-    {reply, State#state.li, State};
+    {ok, List} = ldf_db:get_all_li(),
+    {reply, List, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
