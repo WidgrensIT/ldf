@@ -8,6 +8,7 @@ CREATE TABLE li
 
 CREATE TABLE ldf_message
 (
-    id SERIAL PRIMARY KEY,
-    payload VARCHAR
+    id UUID PRIMARY KEY,
+    payload VARCHAR,
+    content_length INTEGER
 );

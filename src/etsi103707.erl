@@ -1,6 +1,6 @@
 -module(etsi103707).
 
--export([json_to_xml/1]).
+-export([json_to_xml/2]).
 
 -include_lib("xmerl/include/xmerl.hrl").
 %% =DEBUG REPORT==== 23-Nov-2020::13:45:33.254058 ===
@@ -13,7 +13,8 @@ json_to_xml(#{<<"chatId">> := ChatId,
               <<"id">> := MessageId,
               <<"payload">> := Payload,
               <<"sender">> := Sender,
-              <<"timestamp">> := Timestamp}) ->
+              <<"timestamp">> := Timestamp},
+              ContentLength) ->
     logger:debug("converting to 103 707"),
     Content = [
                #xmlElement{name = header},
@@ -24,7 +25,7 @@ json_to_xml(#{<<"chatId">> := ChatId,
                                                        value = [<<"MessagingPayload">>]
                                                       }
                                         ],
-                            content = [core_parameters(Sender, <<"true">>, ChatId, integer_to_binary(Timestamp))
+                            content = [core_parameters(Sender, <<"true">>, ChatId, integer_to_binary(Timestamp), MessageId, ContentLength)
                                       ]
                             }
                 ],
@@ -48,11 +49,12 @@ header(Content) ->
                 content = Content
                 }.
 
-core_parameters(Sender, IsTargetedParty, Receiver, Timestamp) ->
+core_parameters(Sender, IsTargetedParty, Receiver, Timestamp, MessageId, ContentLength) ->
     #xmlElement{name = coreParameters,
                 content = [message_sender(Sender, IsTargetedParty),
                            message_receiver(Receiver),
-                           timestamp(Timestamp)]
+                           timestamp(Timestamp),
+                           associated_binary_data(MessageId, ContentLength)]
                }.
 
 message_sender(Sender, IsTargetedParty) ->
@@ -77,3 +79,15 @@ message_receiver(Receiver) ->
 timestamp(Timestamp) ->
     #xmlElement{name = timestamp,
                 content = [#xmlText{value = [Timestamp]}]}.
+
+associated_binary_data(MessageId, ContentLength) ->
+    #xmlElement{name = associatedBinaryData,
+                content = [#xmlElement{name = binaryObject,
+                                       content = [#xmlElement{name = url,
+                                                              content = [#xmlText{value = [<<"http://localhost:8095/message/", MessageId/binary>>]}]},
+                                                  #xmlElement{name = cspDefinedIdentifier,
+                                                              content = [#xmlText{value = [MessageId]}]},
+                                                  #xmlElement{name = contentLength,
+                                                              content = [#xmlText{value = [ContentLength]}]},
+                                                  #xmlElement{name = contentType,
+                                                              content = [#xmlText{value = [<<"plain/text">>]}]}]}]}.
