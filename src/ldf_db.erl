@@ -3,7 +3,7 @@
 -export([get_all_li/0,
          add_li/3,
          remove_li/1,
-         add_message/3,
+         add_message/2,
          get_messages/0,
          get_message/1]).
 
@@ -20,12 +20,12 @@ remove_li(Id) ->
     SQL = <<"DELETE FROM li WHERE callback_id = $1">>,
     query1(SQL, [Id]).
 
-add_message(MessageId, Payload, CL) ->
-    SQL = <<"INSERT INTO ldf_message (id, payload, content_length) VALUES ($1, $2, $3)">>,
-    query1(SQL, [MessageId, Payload, CL]).
+add_message(MessageId, Payload) ->
+    SQL = <<"INSERT INTO ldf_message (id, payload) VALUES ($1, $2)">>,
+    query1(SQL, [MessageId, Payload]).
 
 get_messages() ->
-    SQL = <<"SELECT payload, content_length FROM ldf_message">>,
+    SQL = <<"SELECT payload FROM ldf_message">>,
     query(SQL, []).
 
 get_message(MessageId) ->
