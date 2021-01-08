@@ -6,13 +6,15 @@
 -export([start_link/0,
          add_li/2,
          remove_li/1,
-         get_all_li/0]).
+         get_all_li/0,
+         get_history/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3, format_status/2]).
 
 -define(SERVER, ?MODULE).
+-define(BASEPATH, <<"http://localhost:8090">>).
 -define(CALLBACKPATH, <<"http://localhost:8090/v1/callback">>).
 -define(URL, <<"http://localhost:8095/receiver">>).
 
@@ -36,6 +38,9 @@ start_link() ->
 
 add_li(Type, Value) ->
     gen_server:call(?MODULE, {add, Type, Value}).
+
+get_history(Json) ->
+    gen_server:call(?MODULE, {history, Json}).
 
 remove_li(Id) ->
     gen_server:call(?MODULE, {remove, Id}).
@@ -99,6 +104,10 @@ handle_call({remove, CallbackId}, _, State) ->
 handle_call(get_all, _, State) ->
     {ok, List} = ldf_db:get_all_li(),
     {reply, List, State};
+handle_call({history, Json}, _, State) ->
+    #{status := {200, _}} = shttpc:post([?BASEPATH, <<"/v1/history">>], Json,  #{headers => #{'Content-Type' => <<"application/json">>},
+                                                           close => true}),
+    {reply, ok, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
