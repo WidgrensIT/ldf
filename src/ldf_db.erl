@@ -20,16 +20,16 @@ remove_li(Id) ->
     SQL = <<"DELETE FROM li WHERE callback_id = $1">>,
     query1(SQL, [Id]).
 
-add_message(MessageId, Payload) ->
-    SQL = <<"INSERT INTO ldf_message (id, payload) VALUES ($1, $2)">>,
-    query1(SQL, [MessageId, Payload]).
+add_message(Payload, MessageId) ->
+    SQL = <<"INSERT INTO ldf_message (payload, message_id) VALUES ($1, $2)">>,
+    query1(SQL, [Payload, MessageId]).
 
 get_messages() ->
     SQL = <<"SELECT payload FROM ldf_message">>,
     query(SQL, []).
 
 get_message(MessageId) ->
-    SQL = <<"SELECT payload FROM ldf_message WHERE id=$1">>,
+    SQL = <<"SELECT payload FROM ldf_message WHERE message_id=$1">>,
     query1(SQL, [MessageId]).
 
 % Expect 1 result

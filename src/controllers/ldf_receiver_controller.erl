@@ -4,9 +4,8 @@
         ]).
 
 message(#{req := #{method := <<"POST">>},
-        json := Json}) ->
-    #{<<"id">> := MessageId} = Json,
-    ok = ldf_db:add_message(MessageId, encode(Json)),
+        json := #{<<"id">> := MessageId} = Json}) ->
+    ok = ldf_db:add_message(encode(Json), MessageId),
     {status, 200};
 message(#{req := #{method := <<"GET">>}}) ->
     {ok, List} = ldf_db:get_messages(),

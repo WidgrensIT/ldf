@@ -16,7 +16,9 @@
             <input type="radio" id="phoneNumber" value="phone_number" v-model="picked">
             <label for="phoneNumber">Phone number</label>
             <input v-model="newItem" type="text" placeholder="Add email or phone number" class="form-control">
+            <input v-model="date" type="text" placeholder="2020-12-20T12:12:23Z" class="form-control">
             <button class="btn btn-primary" @click="saveItem">Add</button>
+            <button class="btn btn-primary" @click="getHistory">Get history</button>
             <table class="table">
                 <thead>
                     <tr>
@@ -46,6 +48,7 @@
             new Vue({
                 el: '#li-list',
                 newItem: '',
+                date: '',
                 data: {
                     items: [],
                     picked: null
@@ -71,6 +74,15 @@
                             .delete('http://localhost:8095/li/' + item.callback_id);
 
                         window.location.reload();
+                    },
+                    getHistory: function() {
+                        var dateObj = new Date(this.date);
+                        var timestamp = Date.parse(dateObj);
+                        item = {value: this.newItem,
+                                type: this.picked,
+                                timestamp: timestamp};
+                        axios
+                            .post('http://localhost:8095/history', item);
                     }
                 }
             });
