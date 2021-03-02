@@ -5,8 +5,9 @@
 
 message(#{req := #{method := <<"GET">>,
                    bindings := #{messageid := MessageId}}}) ->
-    {ok, #{payload := Object}} = ldf_db:get_message(MessageId),
-    {json, 200, #{}, decode(Object)}.
+    {ok, MessageList} = ldf_db:get_message(MessageId),
+    ObjectList = [ decode(Object) || #{ payload := Object } <- MessageList],
+    {json, 200, #{}, ObjectList}.
 
 decode(Item) ->
     json:decode(Item, [maps]).

@@ -9,6 +9,7 @@
            ],
  statics => [
              {"/www/admin", "assets/admin.html"},
-             {"/www/receiver", "assets/receiver.html"}
+             {"/www/receiver", "assets/receiver.html"},
+             {"/assets/[...]", "assets"}
             ]
 }.
