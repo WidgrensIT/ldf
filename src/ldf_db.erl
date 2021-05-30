@@ -1,8 +1,6 @@
 -module(ldf_db).
 
--export([init/0,
-         drop/0,
-         get_all_li/0,
+-export([get_all_li/0,
          add_li/7,
          find_li/2,
          remove_li/1,
@@ -10,13 +8,6 @@
          get_messages/0,
          get_message/1]).
 
-
-init() ->
-    {ok, BinFile} = file:read_file(<<"./priv/ldf.sql">>),
-    query(BinFile, []).
-
-drop() ->
-    query(<<"DROP DATABASE ldf WITH (FORCE);">>, []).
 get_all_li() ->
     SQL = <<"SELECT * FROM li">>,
     query(SQL, []).
