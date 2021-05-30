@@ -86,7 +86,7 @@ handle_call({add, Type, Value}, _, State) ->
              <<"value">> => Value,
              <<"url">> => ?URL},
     case shttpc:post([?CALLBACKPATH],
-                      json:encode(Object, [maps,binary]),
+                      json:encode(Object, [maps, binary]),
                       #{headers => #{'Content-Type' => <<"application/json">>}, close => true}) of
         #{status := {404, _}} ->
             {reply, undefined, State};
@@ -109,8 +109,11 @@ handle_call(get_all, _, State) ->
     {ok, List} = ldf_db:get_all_li(),
     {reply, List, State};
 handle_call({history, Json}, _, State) ->
-    #{status := {200, _}} = shttpc:post([?BASEPATH, <<"/v1/history">>], Json,  #{headers => #{'Content-Type' => <<"application/json">>},
-                                                           close => true}),
+    #{status := {200, _}} = shttpc:post([?BASEPATH,
+                                         <<"/v1/history">>],
+                                         Json,
+                                         #{headers => #{'Content-Type' => <<"application/json">>},
+                                                         close => true}),
     {reply, ok, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,

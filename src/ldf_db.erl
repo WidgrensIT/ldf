@@ -30,7 +30,14 @@ add_li(Type, Value, CallbackId, UserId, Username, PhoneNumber, Email) ->
               end,
     case {PhoneLi, EmailLi} of
          {undefined, undefined} ->
-              SQL = <<"INSERT INTO li (type, value, callback_id, user_id, username, phone_number, email) VALUES ($1, $2, $3, $4, $5, $6, $7)">>,
+              SQL = <<"INSERT INTO li (type,
+                                       value,
+                                       callback_id,
+                                       user_id,
+                                       username,
+                                       phone_number,
+                                       email)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7)">>,
               query1(SQL, [Type, Value, CallbackId, UserId, Username, PhoneNumber, Email]);
           _ -> ok
     end.

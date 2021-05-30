@@ -52,7 +52,14 @@ json_to_xml(#{<<"chat_id">> := ChatId,
                                                        value = [<<"MessagingPayload">>]
                                                       }
                                         ],
-                            content = [core_parameters(Sender, <<"true">>, ChatId, calendar:system_time_to_rfc3339(Timestamp, [{unit, millisecond}]), MessageId, ContentLength, Mime),
+                            content = [core_parameters(Sender,
+                                                       <<"true">>,
+                                                       ChatId,
+                                                       calendar:system_time_to_rfc3339(Timestamp,
+                                                                                       [{unit, millisecond}]),
+                                                       MessageId,
+                                                       ContentLength,
+                                                       Mime),
                                         CspDefinedParameters
                                       ]
                             }
@@ -109,10 +116,12 @@ timestamp(Timestamp) ->
                 content = [#xmlText{value = [Timestamp]}]}.
 
 associated_binary_data(MessageId, ContentLength, Mime) ->
+    Url = #xmlElement{name = url,
+                      content = [#xmlText{value = [<<"http://localhost:8095/message/",
+                                                      MessageId/binary>>]}]},
     #xmlElement{name = associatedBinaryData,
                 content = [#xmlElement{name = binaryObject,
-                                       content = [#xmlElement{name = url,
-                                                              content = [#xmlText{value = [<<"http://localhost:8095/message/", MessageId/binary>>]}]},
+                                       content = [Url,
                                                   #xmlElement{name = cspDefinedIdentifier,
                                                               content = [#xmlText{value = [MessageId]}]},
                                                   #xmlElement{name = contentLength,
