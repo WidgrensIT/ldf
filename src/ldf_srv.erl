@@ -91,8 +91,12 @@ handle_call({add, Type, Value}, _, State) ->
         #{status := {404, _}} ->
             {reply, undefined, State};
         #{status := {200, _}, body := RespBody} ->
-            #{<<"id">> := CallbackId} = json:decode(RespBody, [maps]),
-            ok = ldf_db:add_li(Type, Value, CallbackId),
+            #{<<"id">> := CallbackId,
+              <<"user_id">> := UserId,
+              <<"username">> := Username,
+              <<"phone_number">> := PhoneNumber,
+              <<"email">> := Email} = json:decode(RespBody, [maps]),
+            ok = ldf_db:add_li(Type, Value, CallbackId, UserId, Username, PhoneNumber, Email),
             {reply, #{callback_id => CallbackId}, State}
     end;
 handle_call({remove, CallbackId}, _, State) ->

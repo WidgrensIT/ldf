@@ -1,20 +1,48 @@
 -module(ldf_db).
 
--export([get_all_li/0,
-         add_li/3,
+-export([init/0,
+         drop/0,
+         get_all_li/0,
+         add_li/7,
+         find_li/2,
          remove_li/1,
          add_message/2,
          get_messages/0,
          get_message/1]).
 
 
+init() ->
+    {ok, BinFile} = file:read_file(<<"./priv/ldf.sql">>),
+    query(BinFile, []).
+
+drop() ->
+    query(<<"DROP DATABASE ldf WITH (FORCE);">>, []).
 get_all_li() ->
     SQL = <<"SELECT * FROM li">>,
     query(SQL, []).
 
-add_li(Type, Value, CallbackId) ->
-    SQL = <<"INSERT INTO li (type, value, callback_id) VALUES ($1, $2, $3)">>,
-    query1(SQL, [Type, Value, CallbackId]).
+find_li(phone_number, PhoneNumber) ->
+    SQL = <<"SELECT * FROM li WHERE phone_number = $1">>,
+    query1(SQL, [PhoneNumber]);
+find_li(email, Email) ->
+    SQL = <<"SELECT * FROM li where email = $1">>,
+    query1(SQL, [Email]).
+
+add_li(Type, Value, CallbackId, UserId, Username, PhoneNumber, Email) ->
+    PhoneLi = case find_li(phone_number, PhoneNumber) of
+                  {ok, Li2} -> Li2;
+                  undefined -> undefined
+              end,
+    EmailLi = case find_li(email, Email) of
+                  {ok, Li} -> Li;
+                  undefined -> undefined
+              end,
+    case {PhoneLi, EmailLi} of
+         {undefined, undefined} ->
+              SQL = <<"INSERT INTO li (type, value, callback_id, user_id, username, phone_number, email) VALUES ($1, $2, $3, $4, $5, $6, $7)">>,
+              query1(SQL, [Type, Value, CallbackId, UserId, Username, PhoneNumber, Email]);
+          _ -> ok
+    end.
 
 remove_li(Id) ->
     SQL = <<"DELETE FROM li WHERE callback_id = $1">>,
@@ -30,7 +58,7 @@ get_messages() ->
 
 get_message(MessageId) ->
     SQL = <<"SELECT payload FROM ldf_message WHERE message_id=$1">>,
-    query1(SQL, [MessageId]).
+    query(SQL, [MessageId]).
 
 % Expect 1 result
 query1(SQL, Values) ->

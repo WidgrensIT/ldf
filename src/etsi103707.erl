@@ -38,7 +38,13 @@ json_to_xml(#{<<"chat_id">> := ChatId,
                             end
                     end,
     Content = [
-               #xmlElement{name = header},
+               #xmlElement{name = header,
+                           content = [#xmlElement{name = 'applicationCorrelation',
+                                                  content = [#xmlElement{name = 'applicationLevelID',
+                                                                         content = [#xmlText{value = <<"something">>}]},
+                                                             #xmlElement{name = 'applicationSequenceNumber',
+                                                                         content = [#xmlText{value = <<"3">>}]}
+                                                                        ]}]},
                #xmlElement{name = payload,
                            attributes = [
                                          #xmlAttribute{
@@ -46,7 +52,7 @@ json_to_xml(#{<<"chat_id">> := ChatId,
                                                        value = [<<"MessagingPayload">>]
                                                       }
                                         ],
-                            content = [core_parameters(Sender, <<"true">>, ChatId, integer_to_binary(Timestamp), MessageId, ContentLength, Mime),
+                            content = [core_parameters(Sender, <<"true">>, ChatId, calendar:system_time_to_rfc3339(Timestamp, [{unit, millisecond}]), MessageId, ContentLength, Mime),
                                         CspDefinedParameters
                                       ]
                             }
@@ -121,14 +127,15 @@ csp_defined_parameters(Object) ->
 
 csp_defined_metadata(Keys) ->
     #xmlElement{name = cspDefinedMetadata,
-                content = [schema_details(Keys)]}.
+                content = [schema_details(Keys),
+                           #xmlElement{name = xmlData,
+                                       content = [chatli_defined_parameters(Keys)]}]}.
 
 schema_details(Keys) ->
     #xmlElement{name = schemaDetails,
                 content = [#xmlElement{name = schemaIdentifier,
-                                       content = [#xmlText{value = [?SCHEMAIDENTIFIER]}]},
-                           #xmlElement{name = xmlData,
-                                       content = [chatli_defined_parameters(Keys)]}]}.
+                                       content = [#xmlText{value = [?SCHEMAIDENTIFIER]}]}
+                           ]}.
 
 chatli_defined_parameters(Keys) ->
     #xmlElement{name = chatLiDefinedParameters,

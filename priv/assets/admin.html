@@ -26,7 +26,10 @@
                         <th>Type</th>
                         <th>Value</th>
                         <th>Callback Id</th>
-                        <th>Action</th>
+                        <th>User Id</th>
+                        <th>Username</th>
+                        <th>Phone number</th>
+                        <th>Email</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,13 +39,17 @@
                             <td>{{ item.type }}</td>
                             <td>{{ item.value }}</td>
                             <td>{{ item.callback_id }}</td>
+                            <td>{{ item.user_id }}</td>
+                            <td>{{ item.username }}</td>
+                            <td>{{ item.phone_number }}</td>
+                            <td>{{ item.email }}</td>
                             <td><button class="btn btn-danger" @click="removeItem(item)">Remove</button></td>
                         </tr>
                     </template>
                 </tbody>
             </table>
         </div>
-        <script src="/assets/js/vue"></script>
+        <script src="/assets/js/vue.js"></script>
         <script src="/assets/js/axios.min.js"></script>
         <script>
             new Vue({
