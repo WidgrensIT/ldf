@@ -8,6 +8,8 @@ WORKDIR /buildroot
 # Copy our Erlang test application
 COPY . .
 RUN apk add --update git
+
+CMD ["rm", "-rf", "_build"]
 RUN rebar3 release
 
 # Build stage 1
