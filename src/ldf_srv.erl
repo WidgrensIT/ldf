@@ -14,9 +14,9 @@
          terminate/2, code_change/3, format_status/2]).
 
 -define(SERVER, ?MODULE).
--define(BASEPATH, <<"http://localhost:8090">>).
--define(CALLBACKPATH, <<"http://localhost:8090/v1/callback">>).
--define(URL, <<"http://localhost:8095/receiver">>).
+-define(BASEPATH, <<"http://chatli:8090">>).
+-define(CALLBACKPATH, <<"http://chatli:8090/v1/callback">>).
+-define(URL, <<"http://ldf:8095/receiver">>).
 
 -record(state, {}).
 
