@@ -14,9 +14,6 @@
          terminate/2, code_change/3, format_status/2]).
 
 -define(SERVER, ?MODULE).
--define(BASEPATH, <<"http://chatli:8090">>).
--define(CALLBACKPATH, <<"http://chatli:8090/v1/callback">>).
--define(URL, <<"http://ldf:8095/receiver">>).
 
 -record(state, {}).
 
@@ -82,10 +79,20 @@ init([]) ->
           {stop, Reason :: term(), Reply :: term(), NewState :: term()} |
           {stop, Reason :: term(), NewState :: term()}.
 handle_call({add, Type, Value}, _, State) ->
+    Url = case application:get_env(ldf, ldf_callback) of
+              {ok, Config} -> Config;
+              undefined ->
+                {ok, IfConfig} = inet:getifaddrs(),
+                Eth0 = proplists:get_value("eth0", IfConfig),
+                [IP] = [ {A, B, C, D} || {addr, {A, B, C, D}} <- Eth0],
+                IP2 = list_to_binary(inet:ntoa(IP)),
+                <<"http://", IP2/binary, ":8095/receiver">>
+          end,
     Object = #{<<"type">> => Type,
-             <<"value">> => Value,
-             <<"url">> => ?URL},
-    case shttpc:post([?CALLBACKPATH],
+               <<"value">> => Value,
+               <<"url">> => Url},
+    {ok, ChatliPath} = application:get_env(ldf, chatli_path),
+    case shttpc:post([ChatliPath, <<"/callback">>],
                       json:encode(Object, [maps, binary]),
                       #{headers => #{'Content-Type' => <<"application/json">>}, close => true}) of
         #{status := {404, _}} ->
@@ -100,7 +107,8 @@ handle_call({add, Type, Value}, _, State) ->
             {reply, #{callback_id => CallbackId}, State}
     end;
 handle_call({remove, CallbackId}, _, State) ->
-    #{status := {200, _}} = shttpc:delete([?CALLBACKPATH, <<"/">>, CallbackId],
+    {ok, ChatliPath} = application:get_env(ldf, chatli_path),
+    #{status := {200, _}} = shttpc:delete([ChatliPath, <<"/callback">>, <<"/">>, CallbackId],
                                             #{headers => #{'Content-Type' => <<"application/json">>},
                                               close => true}),
     ok = ldf_db:remove_li(CallbackId),
@@ -109,8 +117,8 @@ handle_call(get_all, _, State) ->
     {ok, List} = ldf_db:get_all_li(),
     {reply, List, State};
 handle_call({history, Json}, _, State) ->
-    #{status := {200, _}} = shttpc:post([?BASEPATH,
-                                         <<"/v1/history">>],
+    {ok, ChatliPath} = application:get_env(ldf, chatli_path),
+    #{status := {200, _}} = shttpc:post([ChatliPath, <<"/history">>],
                                          Json,
                                          #{headers => #{'Content-Type' => <<"application/json">>},
                                                          close => true}),

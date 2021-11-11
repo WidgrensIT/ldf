@@ -3,8 +3,7 @@
          message/1
         ]).
 
-message(#{req := #{method := <<"GET">>,
-                   bindings := #{messageid := MessageId}}}) ->
+message(#{bindings := #{<<"messageid">> := MessageId}}) ->
     {ok, MessageList} = ldf_db:get_message(MessageId),
     ObjectList = [ decode(Object) || #{ payload := Object } <- MessageList],
     {json, 200, #{}, ObjectList}.
