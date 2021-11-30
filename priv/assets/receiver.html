@@ -10,6 +10,17 @@
     <body>
         <div id="li-list">
             <h1>LDF Receiver</h1>
+            <input type="radio" id="103707" value="103707" v-model="picked">
+            <label for="103707">103707</label>
+            <input type="radio" id="103120" value="103120" v-model="picked">
+            <label for="103120">103120</label><br>
+            <label for="countryCode">Country Code</label>
+            <input v-model="countryCode" type="text" placeholder="SE" class="form-control">
+            <label for="sender">Sender</label>
+            <input v-model="sender" type="text" placeholder="f7b38465-a0c7-4b2a-91cd-acb52152451f" class="form-control">
+            <label for="receiver">Receiver</label>
+            <input v-model="receiver" type="text" placeholder="1538d92a-0838-4864-8bb7-3b8825d6adbd" class="form-control">
+            <button class="btn btn-primary" @click="getMessages">Get messages</button>
             <table class="table">
                 <thead>
                     <tr>
@@ -40,6 +51,16 @@
                         .get('http://localhost:8095/receiver')
                         .then(response => (this.items = response.data))
 
+                },
+                methods: {
+                    getMessages: function() {
+                        axios
+                            .get('http://localhost:8095/receiver?type=' + this.picked +
+                                                                "&countryCode=" + this.countryCode +
+                                                                "&sender=" + this.sender +
+                                                                "&receiver=" + this.receiver )
+                            .then(response => (this.items = response.data))
+                    }
                 }
             });
         </script>

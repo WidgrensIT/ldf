@@ -1,6 +1,7 @@
 -module(ldf_db).
 
 -export([get_all_li/0,
+         get_li_user_id/1,
          add_li/7,
          find_li/2,
          remove_li/1,
@@ -11,6 +12,10 @@
 get_all_li() ->
     SQL = <<"SELECT * FROM li">>,
     query(SQL, []).
+
+get_li_user_id(UserId) ->
+    SQL = <<"SELECT * FROM li WHERE user_id = $1">>,
+    query1(SQL, [UserId]).
 
 find_li(phone_number, PhoneNumber) ->
     SQL = <<"SELECT * FROM li WHERE phone_number = $1">>,

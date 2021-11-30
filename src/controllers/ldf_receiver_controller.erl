@@ -18,6 +18,16 @@ create_message(#{json := #{<<"id">> := MessageId} = Json}) ->
     ok = ldf_db:add_message(EncodedMessage, MessageId),
     {status, 200}.
 
+get_message(#{parsed_qs := ParsedQS}) ->
+    {ok, List} = ldf_db:get_messages(),
+    Xml = case maps:get(<<"type">>, ParsedQS, undefined) of
+              <<"103120">> -> #{<<"countryCode">> := CountryCode,
+                                <<"sender">> := Sender,
+                                <<"receiver">> := Receiver} = ParsedQS,
+                             [etsi103120:json_to_xml(decode(Json), CountryCode, Sender, Receiver) || #{payload := Json} <- List];
+              _ -> [etsi103707:json_to_xml(decode(Json)) || #{payload := Json} <- List]
+          end,
+    {json, 200, #{}, Xml};
 get_message(_) ->
     {ok, List} = ldf_db:get_messages(),
     Xml = [etsi103707:json_to_xml(decode(Json)) || #{payload := Json} <- List],
