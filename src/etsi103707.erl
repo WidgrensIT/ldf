@@ -53,7 +53,7 @@ json_to_xml(#{<<"chat_id">> := ChatId,
                                                       }
                                         ],
                             content = [core_parameters(Sender,
-                                                       <<"true">>,
+                                                       dummy,
                                                        ChatId,
                                                        calendar:system_time_to_rfc3339(Timestamp,
                                                                                        [{unit, millisecond}]),
@@ -84,28 +84,49 @@ header(Content) ->
                 content = Content
                 }.
 
-core_parameters(Sender, IsTargetedParty, Receiver, Timestamp, MessageId, ContentLength, Mime) ->
+core_parameters(Sender, _, Receiver, Timestamp, MessageId, ContentLength, Mime) ->
+    {IsTargetedPartyBool, SenderInfo} = case ldf_db:get_li_user_id(Sender) of
+                                            {ok, User} -> {<<"true">>, User};
+                                            _ -> {<<"false">>, #{}}
+                                        end,
+    logger:debug("sender info: ~p", [SenderInfo]),
     #xmlElement{name = coreParameters,
-                content = [message_sender(Sender, IsTargetedParty),
+                content = [message_sender({Sender, SenderInfo}, IsTargetedPartyBool),
                            message_receiver(Receiver),
                            timestamp(Timestamp),
                            associated_binary_data(MessageId, ContentLength, Mime)]
                }.
 
-message_sender(Sender, IsTargetedParty) ->
+message_sender({Sender, SenderInfo}, IsTargetedParty) ->
     #xmlElement{name = messageSender,
-                content = [identifiers(Sender),
+                content = [identifiers(Sender, SenderInfo),
                            #xmlElement{name = isTargetedParty,
                                        content = [#xmlText{value = [IsTargetedParty]}]}]
                }.
 
-identifiers(Identifier) ->
+identifiers(Identifier, #{email := Email,
+                          phone_number := PhoneNumber}) ->
     #xmlElement{name = identifiers,
                 content = [#xmlElement{name = identifier,
                                        content = [#xmlText{value = [Identifier]}]
+                                      },
+                           #xmlElement{name = identifier,
+                                       content = [#xmlText{value = [Email]}]
+                                      },
+                           #xmlElement{name = identifier,
+                                       content = [#xmlText{value = [PhoneNumber]}]
                                       }
                           ]
-               }.
+               };
+identifiers(Identifier, _) -> identifiers(Identifier).
+
+identifiers(Identifier) ->
+#xmlElement{name = identifiers,
+  content = [#xmlElement{name = identifier,
+                         content = [#xmlText{value = [Identifier]}]
+                        }
+            ]
+ }.
 message_receiver(Receiver) ->
     #xmlElement{name = messageReceiver,
                 content = [identifiers(Receiver)]
@@ -180,3 +201,20 @@ items(Keys, N) ->
 %                 }
 
 % csp_defined_metadata(Keys)
+%
+% <Header>
+%<SenderIdentifier>
+%<CountryCode>XX</CountryCode>
+%<UniqueIdentifier>ACTOR02</UniqueIdentifier>
+%</SenderIdentifier>
+%<ReceiverIdentifier>
+%<CountryCode>XX</CountryCode>
+%<UniqueIdentifier>ACTOR01</UniqueIdentifier>
+%</ReceiverIdentifier>
+%<TransactionIdentifier>8854cfad-44ac-43b8-99ae-530b690b43da</TransactionIdentifier>
+%<Timestamp>2019-09-30T13:37:37.000000Z</Timestamp>
+%<Version>
+%<ETSIVersion>V1.9.1</ETSIVersion>
+%<NationalProfileOwner>XX</NationalProfileOwner>
+%<NationalProfileVersion>v1.0</NationalProfileVersion>
+%</Version>
