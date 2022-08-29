@@ -14,7 +14,7 @@ json_to_xml(#{<<"chat_id">> := ChatId,
             CountryCode,
             SenderUUID,
             ReceiverUUID) ->
-    logger:debug("converting to 103 707"),
+    logger:debug("converting to 103 120"),
     CspDefinedParameters = csp_defined_parameters(Object),
     logger:debug("payload: ~p", [Payload]),
     Mime = case Payload of
@@ -39,15 +39,15 @@ json_to_xml(#{<<"chat_id">> := ChatId,
                #xmlElement{name = 'etsi707:header',
                            content = [#xmlElement{name = 'etsi707:applicationCorrelation',
                                                   content = [#xmlElement{name = 'etsi707:applicationLevelID',
-                                                                         content = [#xmlText{value = <<"something">>}]},
+                                                                         content = [#xmlText{value = <<"1">>}]},
                                                              #xmlElement{name = 'etsi707:applicationSequenceNumber',
                                                                          content = [#xmlText{value = <<"3">>}]}
                                                                         ]}]},
                #xmlElement{name = 'etsi707:payload',
                            attributes = [
                                          #xmlAttribute{
-                                                       name = 'etsi707:xsi:type',
-                                                       value = [<<"MessagingPayload">>]
+                                                       name = 'xsi:type',
+                                                       value = [<<"etsi707:MessagingPayload">>]
                                                       }
                                         ],
                             content = [core_parameters(Sender,
@@ -69,16 +69,7 @@ json_to_xml(#{<<"chat_id">> := ChatId,
 header(Content) ->
     [#xmlElement{
                 name = 'etsi707:handoverItem',
-                attributes = [
-                              #xmlAttribute{
-                                            name = 'etsi707:xmlns',
-                                            value = [<<"http://uri.etsi.org/03707/2020/02">>]
-                                           },
-                              #xmlAttribute{
-                                            name = 'etsi707:xmlns:xsi',
-                                            value = [<<"http://www.w3.org/2001/XMLSchema-instance">>]
-                                           }
-                             ],
+                attributes = [],
                 content = Content
                 }].
 
@@ -168,7 +159,7 @@ schema_details(Keys) ->
 chatli_defined_parameters(Keys) ->
     #xmlElement{name = 'etsi707:chatLiDefinedParameters',
                 attributes = [#xmlAttribute{
-                                            name = 'etsi707:xmlns:xs',
+                                            name = 'xmlns:xs',
                                             value = [<<"http://www.w3.org/2001/XMLSchema">>]
                                            }],
                 content = items(Keys, 1)}.
@@ -178,14 +169,14 @@ items(Keys, N) ->
     case Keys of
         [] -> [];
         [Key|T] ->
-            [#xmlElement{name = binary_to_atom(<<"etsi707:item", Nbin/binary>>, utf8),
+            [#xmlElement{name = binary_to_atom(<<"chat:item", Nbin/binary>>, utf8),
                          content = [#xmlText{value = [Key]}]} | items(T, N+1)]
     end.
 
 
 hi1(Etsi707, CountryCode, Sender, Receiver)->
     TransactionId = get_v4(),
-    Timestamp = calendar:system_time_to_rfc3339(os:system_time(millisecond), [{unit, millisecond}]),
+    Timestamp = calendar:system_time_to_rfc3339(os:system_time(microsecond), [{unit, microsecond}]),
     ObjectIdentifier = get_v4(),
     CC = case CountryCode of
              <<"undefined">> -> <<"SE">>;
@@ -235,12 +226,12 @@ hi1(Etsi707, CountryCode, Sender, Receiver)->
                                                               content = [#xmlElement{name = 'ActionRequests',
                                                                                      content = [#xmlElement{name = 'ActionRequest',
                                                                                                             content = [#xmlElement{name = 'ActionIdentifier',
-                                                                                                                                   content = []},
+                                                                                                                                   content = [#xmlText{value = <<"0">>}]},
                                                                                                                        #xmlElement{name = 'DELIVER',
                                                                                                                                    content = [#xmlElement{name = 'Identifier',
-                                                                                                                                                          content = []},
+                                                                                                                                                          content = [#xmlText{value = ObjectIdentifier}]},
                                                                                                                                               #xmlElement{name = 'HI1Object',
-                                                                                                                                                          attributes = [#xmlAttribute{name = 'xssi:type',
+                                                                                                                                                          attributes = [#xmlAttribute{name = 'xsi:type',
                                                                                                                                                                                       value = <<"delivery:DeliveryObject">>}],
                                                                                                                                                           content = [#xmlElement{name = 'ObjectIdentifier',
                                                                                                                                                                                  content = [#xmlText{value = [ObjectIdentifier]}]},
@@ -254,9 +245,9 @@ hi1(Etsi707, CountryCode, Sender, Receiver)->
                                                                                                                                                                      #xmlElement{name = 'delivery:DeliveryID',
                                                                                                                                                                                  content = [#xmlText{value = [ObjectIdentifier]}]},
                                                                                                                                                                      #xmlElement{name = 'delivery:SequenceNumber',
-                                                                                                                                                                                 content = []},
+                                                                                                                                                                                 content = [#xmlText{value = <<"1">>}]},
                                                                                                                                                                      #xmlElement{name = 'delivery:LastSequence',
-                                                                                                                                                                                 content = []},
+                                                                                                                                                                                 content = [#xmlText{value = <<"true">>}]},
                                                                                                                                                                      #xmlElement{name = 'delivery:Manifest',
                                                                                                                                                                                  content = [#xmlElement{name = 'delivery:Specification',
                                                                                                                                                                                                         content = [#xmlElement{name = 'common:Owner',
