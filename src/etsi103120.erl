@@ -117,8 +117,9 @@ identifiers(Identifier) ->
             ]
  }.
 message_receiver(Receiver) ->
-    #xmlElement{name = 'etsi707:messageReceiver',
-                content = [identifiers(Receiver)]
+    #xmlElement{name = 'etsi707:messageReceivers',
+                content = [#xmlElement{name = 'etsi707:recipient',
+                                       content = [identifiers(Receiver)]}]
                }.
 
 timestamp(Timestamp) ->
@@ -132,12 +133,12 @@ associated_binary_data(MessageId, ContentLength, Mime) ->
     #xmlElement{name = 'etsi707:associatedBinaryData',
                 content = [#xmlElement{name = 'etsi707:binaryObject',
                                        content = [Url,
-                                                  #xmlElement{name = 'etsi707:cspDefinedIdentifier',
-                                                              content = [#xmlText{value = [MessageId]}]},
                                                   #xmlElement{name = 'etsi707:contentLength',
                                                               content = [#xmlText{value = [ContentLength]}]},
                                                   #xmlElement{name = 'etsi707:contentType',
-                                                              content = [#xmlText{value = [Mime]}]}]}]}.
+                                                              content = [#xmlText{value = [Mime]}]},
+                                                  #xmlElement{name = 'etsi707:cspDefinedIdentifier',
+                                                              content = [#xmlText{value = [MessageId]}]}]}]}.
 
 csp_defined_parameters(Object) ->
     Keys = maps:keys(Object),
