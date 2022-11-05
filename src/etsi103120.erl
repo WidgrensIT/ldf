@@ -110,12 +110,12 @@ identifiers(Identifier, #{email := Email,
 identifiers(Identifier, _) -> identifiers(Identifier).
 
 identifiers(Identifier) ->
-#xmlElement{name = 'etsi707:identifiers',
-  content = [#xmlElement{name = 'etsi707:identifier',
-                         content = [#xmlText{value = [Identifier]}]
-                        }
-            ]
- }.
+    #xmlElement{name = 'etsi707:identifiers',
+    content = [#xmlElement{name = 'etsi707:identifier',
+                            content = [#xmlText{value = [Identifier]}]
+                            }
+                ]
+    }.
 message_receiver(Receiver) ->
     #xmlElement{name = 'etsi707:messageReceivers',
                 content = [#xmlElement{name = 'etsi707:recipient',
@@ -184,11 +184,11 @@ hi1(Etsi707, CountryCode, Sender, Receiver)->
              CountryCode -> CountryCode
          end,
     SenderUnique = case Sender of
-                        <<"undefined">> -> get_v4();
+                        <<"undefined">> -> <<"f7b38465-a0c7-4b2a-91cd-acb52152451f">>;
                         Sender -> Sender
                    end,
     ReceiverUnique = case Receiver of
-                          <<"undefined">> -> get_v4();
+                          <<"undefined">> -> <<"1538d92a-0838-4864-8bb7-3b8825d6adbd">>;
                           Receiver -> Receiver
                      end,
     #xmlElement{name = 'HI1Message',
