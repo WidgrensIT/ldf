@@ -110,12 +110,12 @@ identifiers(Identifier, #{email := Email,
 identifiers(Identifier, _) -> identifiers(Identifier).
 
 identifiers(Identifier) ->
-#xmlElement{name = 'etsi707:identifiers',
-  content = [#xmlElement{name = 'etsi707:identifier',
-                         content = [#xmlText{value = [Identifier]}]
-                        }
-            ]
- }.
+    #xmlElement{name = 'etsi707:identifiers',
+    content = [#xmlElement{name = 'etsi707:identifier',
+                            content = [#xmlText{value = [Identifier]}]
+                            }
+                ]
+    }.
 message_receiver(Receiver) ->
     #xmlElement{name = 'etsi707:messageReceivers',
                 content = [#xmlElement{name = 'etsi707:recipient',
