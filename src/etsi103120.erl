@@ -54,7 +54,7 @@ json_to_xml(#{<<"chat_id">> := ChatId,
                                                        dummy,
                                                        ChatId,
                                                        calendar:system_time_to_rfc3339(Timestamp,
-                                                                                       [{unit, millisecond}]),
+                                                                                       [{unit, microsecond}]),
                                                        MessageId,
                                                        ContentLength,
                                                        Mime),
@@ -79,7 +79,7 @@ core_parameters(Sender, _, Receiver, Timestamp, MessageId, ContentLength, Mime) 
                                             _ -> {<<"false">>, #{}}
                                         end,
     logger:debug("sender info: ~p", [SenderInfo]),
-    #xmlElement{name = coreParameters,
+    #xmlElement{name = 'etsi707:coreParameters',
                 content = [message_sender({Sender, SenderInfo}, IsTargetedPartyBool),
                            message_receiver(Receiver),
                            timestamp(Timestamp),
@@ -158,11 +158,7 @@ schema_details(Keys) ->
                            ]}.
 
 chatli_defined_parameters(Keys) ->
-    #xmlElement{name = 'etsi707:chatLiDefinedParameters',
-                attributes = [#xmlAttribute{
-                                            name = 'xmlns:xs',
-                                            value = [<<"http://www.w3.org/2001/XMLSchema">>]
-                                           }],
+    #xmlElement{name = 'chat:chatLiDefinedParameters',
                 content = items(Keys, 1)}.
 
 items(Keys, N) ->
@@ -184,11 +180,11 @@ hi1(Etsi707, CountryCode, Sender, Receiver)->
              CountryCode -> CountryCode
          end,
     SenderUnique = case Sender of
-                        <<"undefined">> -> get_v4();
+                        <<"undefined">> -> <<"f7b38465-a0c7-4b2a-91cd-acb52152451f">>;
                         Sender -> Sender
                    end,
     ReceiverUnique = case Receiver of
-                          <<"undefined">> -> get_v4();
+                          <<"undefined">> -> <<"1538d92a-0838-4864-8bb7-3b8825d6adbd">>;
                           Receiver -> Receiver
                      end,
     #xmlElement{name = 'HI1Message',
@@ -201,7 +197,9 @@ hi1(Etsi707, CountryCode, Sender, Receiver)->
                               #xmlAttribute{name = 'xmlns:etsi707',
                                             value = <<"http://uri.etsi.org/03707/2020/02">>},
                               #xmlAttribute{name = 'xmlns:xsi',
-                                            value = <<"http://www.w3.org/2001/XMLSchema-instance">>}],
+                                            value = <<"http://www.w3.org/2001/XMLSchema-instance">>},
+                              #xmlAttribute{name = 'xmlns:chat',
+                                            value = <<"chat">>}],
                 content = [#xmlElement{name = 'Header',
                                        content = [
                                                   #xmlElement{name = 'SenderIdentifier',
@@ -242,7 +240,7 @@ hi1(Etsi707, CountryCode, Sender, Receiver)->
                                                                                                                                                                                  content = [#xmlText{value = [SenderUnique]}]},
                                                                                                                                                                      #xmlElement{name = 'delivery:Reference',
                                                                                                                                                                                  content = [#xmlElement{name = 'delivery:LIID',
-                                                                                                                                                                                                        content = [#xmlText{value = [ReceiverUnique]}]}]},
+                                                                                                                                                                                                        content = [#xmlText{value = [<<"LIID">>]}]}]},
                                                                                                                                                                      #xmlElement{name = 'delivery:DeliveryID',
                                                                                                                                                                                  content = [#xmlText{value = [ObjectIdentifier]}]},
                                                                                                                                                                      #xmlElement{name = 'delivery:SequenceNumber',
