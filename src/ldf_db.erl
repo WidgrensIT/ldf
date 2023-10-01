@@ -40,14 +40,16 @@ add_li(Type, Value, CallbackId, UserId, Username, PhoneNumber, Email) ->
     case {PhoneLi, EmailLi} of
         {undefined, undefined} ->
             SQL =
-                <<"INSERT INTO li (type,\n"
-                "                                       value,\n"
-                "                                       callback_id,\n"
-                "                                       user_id,\n"
-                "                                       username,\n"
-                "                                       phone_number,\n"
-                "                                       email)\n"
-                "                        VALUES ($1, $2, $3, $4, $5, $6, $7)">>,
+                <<
+                    "INSERT INTO li (type,\n"
+                    "                                       value,\n"
+                    "                                       callback_id,\n"
+                    "                                       user_id,\n"
+                    "                                       username,\n"
+                    "                                       phone_number,\n"
+                    "                                       email)\n"
+                    "                        VALUES ($1, $2, $3, $4, $5, $6, $7)"
+                >>,
             query1(SQL, [Type, Value, CallbackId, UserId, Username, PhoneNumber, Email]);
         _ ->
             ok
