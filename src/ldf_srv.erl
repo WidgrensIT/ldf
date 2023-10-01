@@ -3,15 +3,24 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0,
-         add_li/2,
-         remove_li/1,
-         get_all_li/0,
-         get_history/1]).
+-export([
+    start_link/0,
+    add_li/2,
+    remove_li/1,
+    get_all_li/0,
+    get_history/1
+]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3, format_status/2]).
+-export([
+    init/1,
+    handle_call/3,
+    handle_cast/2,
+    handle_info/2,
+    terminate/2,
+    code_change/3,
+    format_status/2
+]).
 
 -define(SERVER, ?MODULE).
 
@@ -26,10 +35,11 @@
 %% Starts the server
 %% @end
 %%--------------------------------------------------------------------
--spec start_link() -> {ok, Pid :: pid()} |
-          {error, Error :: {already_started, pid()}} |
-          {error, Error :: term()} |
-          ignore.
+-spec start_link() ->
+    {ok, Pid :: pid()}
+    | {error, Error :: {already_started, pid()}}
+    | {error, Error :: term()}
+    | ignore.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
@@ -54,11 +64,12 @@ get_all_li() ->
 %% Initializes the server
 %% @end
 %%--------------------------------------------------------------------
--spec init(Args :: term()) -> {ok, State :: term()} |
-          {ok, State :: term(), Timeout :: timeout()} |
-          {ok, State :: term(), hibernate} |
-          {stop, Reason :: term()} |
-          ignore.
+-spec init(Args :: term()) ->
+    {ok, State :: term()}
+    | {ok, State :: term(), Timeout :: timeout()}
+    | {ok, State :: term(), hibernate}
+    | {stop, Reason :: term()}
+    | ignore.
 init([]) ->
     process_flag(trap_exit, true),
     {ok, #state{}}.
@@ -70,47 +81,61 @@ init([]) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec handle_call(Request :: term(), From :: {pid(), term()}, State :: term()) ->
-          {reply, Reply :: term(), NewState :: term()} |
-          {reply, Reply :: term(), NewState :: term(), Timeout :: timeout()} |
-          {reply, Reply :: term(), NewState :: term(), hibernate} |
-          {noreply, NewState :: term()} |
-          {noreply, NewState :: term(), Timeout :: timeout()} |
-          {noreply, NewState :: term(), hibernate} |
-          {stop, Reason :: term(), Reply :: term(), NewState :: term()} |
-          {stop, Reason :: term(), NewState :: term()}.
+    {reply, Reply :: term(), NewState :: term()}
+    | {reply, Reply :: term(), NewState :: term(), Timeout :: timeout()}
+    | {reply, Reply :: term(), NewState :: term(), hibernate}
+    | {noreply, NewState :: term()}
+    | {noreply, NewState :: term(), Timeout :: timeout()}
+    | {noreply, NewState :: term(), hibernate}
+    | {stop, Reason :: term(), Reply :: term(), NewState :: term()}
+    | {stop, Reason :: term(), NewState :: term()}.
 handle_call({add, Type, Value}, _, State) ->
-    Url = case application:get_env(ldf, ldf_callback) of
-              {ok, Config} -> Config;
-              undefined ->
+    Url =
+        case application:get_env(ldf, ldf_callback) of
+            {ok, Config} ->
+                Config;
+            undefined ->
                 {ok, IfConfig} = inet:getifaddrs(),
                 Eth0 = proplists:get_value("eth0", IfConfig),
-                [IP] = [ {A, B, C, D} || {addr, {A, B, C, D}} <- Eth0],
+                [IP] = [{A, B, C, D} || {addr, {A, B, C, D}} <- Eth0],
                 IP2 = list_to_binary(inet:ntoa(IP)),
                 <<"http://", IP2/binary, ":8095/receiver">>
-          end,
-    Object = #{<<"type">> => Type,
-               <<"value">> => Value,
-               <<"url">> => Url},
+        end,
+    Object = #{
+        <<"type">> => Type,
+        <<"value">> => Value,
+        <<"url">> => Url
+    },
     {ok, ChatliPath} = application:get_env(ldf, chatli_path),
-    case shttpc:post([ChatliPath, <<"/callback">>],
-                      json:encode(Object, [maps, binary]),
-                      #{headers => #{'Content-Type' => <<"application/json">>}, close => true}) of
+    case
+        shttpc:post(
+            [ChatliPath, <<"/callback">>],
+            json:encode(Object, [maps, binary]),
+            #{headers => #{'Content-Type' => <<"application/json">>}, close => true}
+        )
+    of
         #{status := {404, _}} ->
             {reply, undefined, State};
         #{status := {200, _}, body := RespBody} ->
-            #{<<"id">> := CallbackId,
-              <<"user_id">> := UserId,
-              <<"username">> := Username,
-              <<"phone_number">> := PhoneNumber,
-              <<"email">> := Email} = json:decode(RespBody, [maps]),
+            #{
+                <<"id">> := CallbackId,
+                <<"user_id">> := UserId,
+                <<"username">> := Username,
+                <<"phone_number">> := PhoneNumber,
+                <<"email">> := Email
+            } = json:decode(RespBody, [maps]),
             ok = ldf_db:add_li(Type, Value, CallbackId, UserId, Username, PhoneNumber, Email),
             {reply, #{callback_id => CallbackId}, State}
     end;
 handle_call({remove, CallbackId}, _, State) ->
     {ok, ChatliPath} = application:get_env(ldf, chatli_path),
-    #{status := {200, _}} = shttpc:delete([ChatliPath, <<"/callback">>, <<"/">>, CallbackId],
-                                            #{headers => #{'Content-Type' => <<"application/json">>},
-                                              close => true}),
+    #{status := {200, _}} = shttpc:delete(
+        [ChatliPath, <<"/callback">>, <<"/">>, CallbackId],
+        #{
+            headers => #{'Content-Type' => <<"application/json">>},
+            close => true
+        }
+    ),
     ok = ldf_db:remove_li(CallbackId),
     {reply, #{status => ok}, State};
 handle_call(get_all, _, State) ->
@@ -118,10 +143,14 @@ handle_call(get_all, _, State) ->
     {reply, List, State};
 handle_call({history, Json}, _, State) ->
     {ok, ChatliPath} = application:get_env(ldf, chatli_path),
-    #{status := {200, _}} = shttpc:post([ChatliPath, <<"/history">>],
-                                         Json,
-                                         #{headers => #{'Content-Type' => <<"application/json">>},
-                                                         close => true}),
+    #{status := {200, _}} = shttpc:post(
+        [ChatliPath, <<"/history">>],
+        Json,
+        #{
+            headers => #{'Content-Type' => <<"application/json">>},
+            close => true
+        }
+    ),
     {reply, ok, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -134,10 +163,10 @@ handle_call(_Request, _From, State) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec handle_cast(Request :: term(), State :: term()) ->
-          {noreply, NewState :: term()} |
-          {noreply, NewState :: term(), Timeout :: timeout()} |
-          {noreply, NewState :: term(), hibernate} |
-          {stop, Reason :: term(), NewState :: term()}.
+    {noreply, NewState :: term()}
+    | {noreply, NewState :: term(), Timeout :: timeout()}
+    | {noreply, NewState :: term(), hibernate}
+    | {stop, Reason :: term(), NewState :: term()}.
 handle_cast(_Request, State) ->
     {noreply, State}.
 
@@ -148,10 +177,10 @@ handle_cast(_Request, State) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec handle_info(Info :: timeout() | term(), State :: term()) ->
-          {noreply, NewState :: term()} |
-          {noreply, NewState :: term(), Timeout :: timeout()} |
-          {noreply, NewState :: term(), hibernate} |
-          {stop, Reason :: normal | term(), NewState :: term()}.
+    {noreply, NewState :: term()}
+    | {noreply, NewState :: term(), Timeout :: timeout()}
+    | {noreply, NewState :: term(), hibernate}
+    | {stop, Reason :: normal | term(), NewState :: term()}.
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -164,8 +193,10 @@ handle_info(_Info, State) ->
 %% with Reason. The return value is ignored.
 %% @end
 %%--------------------------------------------------------------------
--spec terminate(Reason :: normal | shutdown | {shutdown, term()} | term(),
-                State :: term()) -> any().
+-spec terminate(
+    Reason :: normal | shutdown | {shutdown, term()} | term(),
+    State :: term()
+) -> any().
 terminate(_Reason, _State) ->
     ok.
 
@@ -175,10 +206,13 @@ terminate(_Reason, _State) ->
 %% Convert process state when code is changed
 %% @end
 %%--------------------------------------------------------------------
--spec code_change(OldVsn :: term() | {down, term()},
-                  State :: term(),
-                  Extra :: term()) -> {ok, NewState :: term()} |
-          {error, Reason :: term()}.
+-spec code_change(
+    OldVsn :: term() | {down, term()},
+    State :: term(),
+    Extra :: term()
+) ->
+    {ok, NewState :: term()}
+    | {error, Reason :: term()}.
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
@@ -190,8 +224,10 @@ code_change(_OldVsn, State, _Extra) ->
 %% or when it appears in termination error logs.
 %% @end
 %%--------------------------------------------------------------------
--spec format_status(Opt :: normal | terminate,
-                    Status :: list()) -> Status :: term().
+-spec format_status(
+    Opt :: normal | terminate,
+    Status :: list()
+) -> Status :: term().
 format_status(_Opt, Status) ->
     Status.
 

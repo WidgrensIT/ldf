@@ -1,21 +1,20 @@
 %% -*- mode: erlang;erlang-indent-level: 4;indent-tabs-mode: nil -*-
-{application, ldf,
- [{description, "ldf managed by Nova"},
-  {vsn, "0.1.0"},
-  {registered, []},
-  {mod, { ldf_app, []}},
-  {included_applications, []},
-  {applications,
-   [
-    kernel,
-    stdlib,
-    nova,
-    xmerl,
-    pgo
-   ]},
-  {env,[]},
-  {modules, []},
-  {maintainers, []},
-  {licenses, ["Apache 2.0"]},
-  {links, []}
- ]}.
+{application, ldf, [
+    {description, "ldf managed by Nova"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {mod, {ldf_app, []}},
+    {included_applications, []},
+    {applications, [
+        kernel,
+        stdlib,
+        nova,
+        xmerl,
+        pgo
+    ]},
+    {env, []},
+    {modules, []},
+    {maintainers, []},
+    {licenses, ["Apache 2.0"]},
+    {links, []}
+]}.
