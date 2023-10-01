@@ -21,6 +21,14 @@
             <label for="receiver">Receiver</label>
             <input v-model="receiver" type="text" placeholder="1538d92a-0838-4864-8bb7-3b8825d6adbd" class="form-control">
             <button class="btn btn-primary" @click="getMessages">Get messages</button>
+            <br>
+            <input type="radio" id="email" value="email" v-model="picked">
+            <label for="email">Email</label>
+            <input type="radio" id="phoneNumber" value="phone_number" v-model="picked">
+            <label for="phoneNumber">Phone number</label>
+            <input v-model="newItem" type="text" placeholder="Add email or phone number" class="form-control">
+            <input v-model="date" type="text" placeholder="2020-12-20T12:12:23Z" class="form-control">
+            <button class="btn btn-primary" @click="getHistory">Get history</button>
             <table class="table">
                 <thead>
                     <tr>
@@ -60,6 +68,15 @@
                                                                 "&sender=" + this.sender +
                                                                 "&receiver=" + this.receiver )
                             .then(response => (this.items = response.data))
+                    },
+                    getHistory: function() {
+                        var dateObj = new Date(this.date);
+                        var timestamp = Date.parse(dateObj);
+                        item = {value: this.newItem,
+                                type: this.picked,
+                                timestamp: timestamp};
+                        axios
+                            .post('http://localhost:8095/history', item);
                     }
                 }
             });

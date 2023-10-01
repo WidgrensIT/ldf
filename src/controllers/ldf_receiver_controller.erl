@@ -19,6 +19,7 @@ create_message(#{json := #{<<"id">> := MessageId} = Json}) ->
     {status, 200}.
 
 get_message(#{parsed_qs := ParsedQS}) ->
+    logger:debug("parse qs"),
     {ok, List} = ldf_db:get_messages(),
     Xml = case maps:get(<<"type">>, ParsedQS, undefined) of
               <<"103120">> -> #{<<"countryCode">> := CountryCode,
@@ -27,14 +28,15 @@ get_message(#{parsed_qs := ParsedQS}) ->
                              [etsi103120:json_to_xml(decode(Json), CountryCode, Sender, Receiver) || #{payload := Json} <- List];
               _ -> [etsi103707:json_to_xml(decode(Json)) || #{payload := Json} <- List]
           end,
-    {json, 200, #{}, Xml};
+    {json, 200, #{<<"Content-type">> => <<"application/json">>}, Xml};
 get_message(_) ->
     {ok, List} = ldf_db:get_messages(),
     Xml = [etsi103707:json_to_xml(decode(Json)) || #{payload := Json} <- List],
-    {json, 200, #{}, Xml}.
+    {json, 200, #{<<"Content-type">> => <<"application/json; charset=utf-8">>}, Xml}.
 
 encode(Item) ->
-    json:encode(Item, [maps, binary]).
+    thoas:encode(Item).
 
 decode(Item) ->
-    json:decode(Item, [maps]).
+    {ok, Map} = thoas:decode(Item),
+    Map.
