@@ -1,13 +1,17 @@
 -module(ldf_li_controller).
 -export([
-         create_li/1,
-         manage_li/1,
-         delete_li/1,
-         manage_history/1
-        ]).
+    create_li/1,
+    manage_li/1,
+    delete_li/1,
+    manage_history/1
+]).
 
-create_li(#{json := #{<<"value">> := Value,
-                      <<"type">> := Type}}) ->
+create_li(#{
+    json := #{
+        <<"value">> := Value,
+        <<"type">> := Type
+    }
+}) ->
     Object = ldf_srv:add_li(Type, Value),
     {json, 201, #{}, Object}.
 
@@ -20,5 +24,5 @@ delete_li(#{bindings := #{<<"liid">> := Liid}}) ->
     {status, 200}.
 
 manage_history(#{json := Json}) ->
-    ldf_srv:get_history(json:encode(Json, [maps, binary])),
+    ldf_srv:get_history(thoas:encode(Json)),
     {status, 200}.

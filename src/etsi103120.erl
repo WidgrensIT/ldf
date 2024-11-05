@@ -34,7 +34,7 @@ json_to_xml(
             false ->
                 case is_map(Payload) of
                     true ->
-                        Json = json:encode(Payload, [maps, binary]),
+                        Json = thoas:encode(Payload),
                         integer_to_binary(byte_size(Json));
                     false ->
                         <<"0">>
