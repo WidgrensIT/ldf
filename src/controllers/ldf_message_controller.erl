@@ -9,4 +9,5 @@ message(#{bindings := #{<<"messageid">> := MessageId}}) ->
     {json, 200, #{}, ObjectList}.
 
 decode(Item) ->
-    {ok, Value} = thoas:decode(Item).
+    {ok, Value} = thoas:decode(Item),
+    Value.
