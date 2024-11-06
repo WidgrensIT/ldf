@@ -232,7 +232,7 @@ csp_defined_metadata(Keys) ->
         ]
     }.
 
-schema_details(Keys) ->
+schema_details(_Keys) ->
     #xmlElement{
         name = schemaDetails,
         content = [
