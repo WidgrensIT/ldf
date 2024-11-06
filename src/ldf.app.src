@@ -8,6 +8,7 @@
     {applications, [
         kernel,
         stdlib,
+        runtime_tools,
         nova,
         xmerl,
         pgo

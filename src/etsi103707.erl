@@ -136,7 +136,7 @@ message_sender({Sender, SenderInfo}, IsTargetedParty) ->
 identifiers(Identifier, #{
     email := Email,
     phone_number := PhoneNumber,
-    'user-agent' := UserAgent
+    user_agent := UserAgent
 }) ->
     #xmlElement{
         name = identifiers,
