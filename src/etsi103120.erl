@@ -132,7 +132,8 @@ message_sender({Sender, SenderInfo}, IsTargetedParty) ->
 
 identifiers(Identifier, #{
     email := Email,
-    phone_number := PhoneNumber
+    phone_number := PhoneNumber,
+    'user-agent' := UserAgent
 }) ->
     #xmlElement{
         name = 'etsi707:identifiers',
@@ -148,6 +149,10 @@ identifiers(Identifier, #{
             #xmlElement{
                 name = 'etsi707:identifier',
                 content = [#xmlText{value = [PhoneNumber]}]
+            },
+            #xmlElement{
+                name = 'etsi707:identifier',
+                content = [#xmlText{value = [UserAgent]}]
             }
         ]
     };
