@@ -17,6 +17,7 @@ json_to_xml(
         <<"id">> := MessageId,
         <<"payload">> := Payload,
         <<"sender">> := Sender,
+        <<"sender_info">> := SenderInfo,
         <<"timestamp">> := Timestamp
     } = Object
 ) ->
@@ -134,9 +135,9 @@ message_sender({Sender, SenderInfo}, IsTargetedParty) ->
     }.
 
 identifiers(Identifier, #{
-    email := Email,
-    phone_number := PhoneNumber,
-    user_agent := UserAgent
+    <<"email">> := Email,
+    <<"phone_number">> := PhoneNumber,
+    <<"user_agent">> := UserAgent
 }) ->
     #xmlElement{
         name = identifiers,

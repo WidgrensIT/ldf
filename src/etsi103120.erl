@@ -12,6 +12,7 @@ json_to_xml(
         <<"id">> := MessageId,
         <<"payload">> := Payload,
         <<"sender">> := Sender,
+        <<"sender_info">> := SenderInfo,
         <<"timestamp">> := Timestamp
     } = Object,
     CountryCode,
@@ -70,7 +71,7 @@ json_to_xml(
             content = [
                 core_parameters(
                     Sender,
-                    dummy,
+                    SenderInfo,
                     ChatId,
                     calendar:system_time_to_rfc3339(
                         Timestamp,
@@ -101,11 +102,11 @@ header(Content) ->
         }
     ].
 
-core_parameters(Sender, _, Receiver, Timestamp, MessageId, ContentLength, Mime) ->
-    {IsTargetedPartyBool, SenderInfo} =
+core_parameters(Sender, SenderInfo, Receiver, Timestamp, MessageId, ContentLength, Mime) ->
+    IsTargetedPartyBool =
         case ldf_db:get_li_user_id(Sender) of
-            {ok, User} -> {<<"true">>, User};
-            _ -> {<<"false">>, #{}}
+            {ok, User} -> <<"true">>;
+            _ -> <<"false">>
         end,
     logger:debug("sender info: ~p", [SenderInfo]),
     #xmlElement{
@@ -131,9 +132,9 @@ message_sender({Sender, SenderInfo}, IsTargetedParty) ->
     }.
 
 identifiers(Identifier, #{
-    email := Email,
-    phone_number := PhoneNumber,
-    user_agent := UserAgent
+    <<"email">> := Email,
+    <<"phone_number">> := PhoneNumber,
+    <<"user_agent">> := UserAgent
 }) ->
     #xmlElement{
         name = 'etsi707:identifiers',
