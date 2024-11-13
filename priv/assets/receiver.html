@@ -51,6 +51,16 @@
                         .get('http://localhost:8095/receiver')
                         .then(response => (this.items = response.data))
 
+                },
+                methods: {
+                    getMessages: function() {
+                        axios
+                            .get('http://localhost:8095/receiver?type=' + this.picked +
+                                                                "&countryCode=" + this.countryCode +
+                                                                "&sender=" + this.sender +
+                                                                "&receiver=" + this.receiver )
+                            .then(response => (this.items = response.data))
+                    }
                 }
             });
         </script>
