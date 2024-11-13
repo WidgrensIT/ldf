@@ -224,9 +224,6 @@ code_change(_OldVsn, State, _Extra) ->
 %% or when it appears in termination error logs.
 %% @end
 %%--------------------------------------------------------------------
--spec format_status(
-    Status :: list()
-) -> Status :: term().
 format_status(Status) ->
     Status.
 
