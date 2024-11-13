@@ -19,7 +19,7 @@
     handle_info/2,
     terminate/2,
     code_change/3,
-    format_status/2
+    format_status/1
 ]).
 
 -define(SERVER, ?MODULE).
@@ -151,7 +151,6 @@ handle_call({history, Json}, _, State) ->
             close => true
         }
     ),
-    jhn_shttpc:post([<<"http://chatli:8090/v1">>, <<"/history">>], <<>>,)
     {reply, ok, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -226,10 +225,9 @@ code_change(_OldVsn, State, _Extra) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec format_status(
-    Opt :: normal | terminate,
     Status :: list()
 ) -> Status :: term().
-format_status(_Opt, Status) ->
+format_status(Status) ->
     Status.
 
 %%%===================================================================
