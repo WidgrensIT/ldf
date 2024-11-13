@@ -49,7 +49,7 @@
                 mounted () {
                     axios
                         .get('http://localhost:8095/receiver')
-                        .then(response => (this.items = response.data))
+                        .then(response => {this.items = response.data})
 
                 },
                 methods: {
@@ -59,7 +59,7 @@
                                                                 "&countryCode=" + this.countryCode +
                                                                 "&sender=" + this.sender +
                                                                 "&receiver=" + this.receiver )
-                            .then(response => (this.items = response.data))
+                            .then(response => {this.items = response.data})
                     }
                 }
             });
