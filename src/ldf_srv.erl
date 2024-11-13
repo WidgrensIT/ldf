@@ -151,6 +151,7 @@ handle_call({history, Json}, _, State) ->
             close => true
         }
     ),
+    jhn_shttpc:post([<<"http://chatli:8090/v1">>, <<"/history">>], <<>>,)
     {reply, ok, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,

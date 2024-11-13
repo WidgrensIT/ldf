@@ -17,6 +17,7 @@ routes(_Env) ->
                 {"/li/:liid", fun ldf_li_controller:delete_li/1, #{methods => [delete]}},
                 {"/www/admin", "assets/admin.html"},
                 {"/www/receiver", "assets/receiver.html"},
+                {"/www/history", "assets/history.html"},
                 {"/assets/[...]", "assets"}
             ]
         }
